@@ -102,21 +102,47 @@ textarea.big{width:100%;min-height:110px;border:1px solid var(--line);border-rad
 [hidden]{display:none!important}
 @media (max-width:860px){.hero,.main{grid-template-columns:minmax(0,1fr)}.grid90{grid-template-columns:repeat(10,minmax(0,1fr))}}
 @media (max-width:420px){.seg button{padding:8px 11px}.rate{grid-template-columns:minmax(0,1fr) 70px 40px}}
+.login{max-width:420px;margin:8vh auto;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px;text-align:center}
+.login h1{font-size:56px;margin:0}.login h1 b{color:var(--o)}
+.login p{color:var(--mut);margin:6px 0 18px}
+.login .btn{width:100%;font-size:17px;min-height:50px;margin-top:8px}
+.login input{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg);font-size:16px;min-height:50px;margin-top:8px;text-align:center}
+.gbtn{background:var(--card)!important;border:1.5px solid var(--ink)!important;color:var(--ink)!important}
+.or{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:14px;margin:18px 0 6px}.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.msg{margin-top:14px;font-weight:700;color:var(--g)}.msg.err{color:var(--r)}
+.out{border:0;background:none;color:#bbb;font-size:14px;min-height:40px;padding:0 6px}
+.who{color:#bbb;font-size:13px}
+.newc{display:grid;gap:8px}.newc input,.newc textarea{border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--bg);font-size:16px;min-height:42px;width:100%}
+.ghost{background:none;border:1.5px solid var(--line);border-radius:10px;padding:8px 14px;font-weight:700;min-height:42px}
+.toast{position:fixed;bottom:18px;inset-inline:0;margin:auto;width:max-content;max-width:90vw;background:#17150f;color:#fff;padding:10px 18px;border-radius:99px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9}.toast.on{opacity:1}
+.empty{text-align:center;padding:12vh 16px;color:var(--mut);font-size:18px}
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap">
  <div class="logo k">מילה של <b>גבר</b> · 90</div>
- <div class="seg" role="tablist" aria-label="תצוגה">
+ <div class="seg" role="tablist" aria-label="תצוגה" id="seg" hidden>
   <button id="vClient" class="on" role="tab">מסך הלקוח</button>
   <button id="vCoach" role="tab">בקרת מאמן</button>
  </div>
+ <span class="who" id="who"></span><button class="out" id="out" hidden>יציאה</button>
 </div></header>
 
 <main class="wrap">
-<p class="sample">אב־טיפוס עם נתוני דוגמה. הסימונים נשמרים בדפדפן הזה בלבד.</p>
+<p class="sample" id="asNote" hidden></p>
+<section id="login" hidden><div class="login">
+ <h1 class="k">90 <b>יום</b></h1>
+ <p>תתחיל היום. לא מחר.</p>
+ <button class="btn gbtn" id="gIn">כניסה עם Google</button>
+ <div class="or">או קישור כניסה למייל</div>
+ <input id="em" type="email" inputmode="email" autocomplete="email" placeholder="המייל שלך" aria-label="המייל שלך" dir="ltr">
+ <button class="btn" id="sendLink">שלחו לי קישור</button>
+ <div class="msg" id="lmsg" role="status"></div>
+</div></section>
+<div class="empty" id="loading">טוען…</div>
+<div class="empty" id="noChal" hidden>עוד לא נפתח לך אתגר במייל הזה.<br>דבר עם דניאל ונפתח לך.</div>
 
-<section id="client">
+<section id="client" hidden>
  <div class="hero">
   <div>
    <div class="hi" id="hello"></div>
@@ -163,13 +189,26 @@ textarea.big{width:100%;min-height:110px;border:1px solid var(--line);border-rad
 </section>
 
 <section id="coach" hidden>
+ <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:16px"><button class="btn" id="newBtn">+ לקוח חדש</button><button class="ghost" id="refresh">רענון</button></div>
+ <div class="card" id="newForm" hidden style="margin-top:14px"><h2>לקוח חדש</h2><div class="newc">
+  <input id="ncName" placeholder="שם פרטי" aria-label="שם">
+  <input id="ncEmail" type="email" placeholder="המייל שאיתו הוא ייכנס" aria-label="מייל" dir="ltr">
+  <label class="hi" style="font-size:14px">תאריך התחלה <input id="ncStart" type="date" style="margin-top:4px"></label>
+  <textarea id="ncGoals" placeholder="מטרות, כל מטרה בשורה" aria-label="מטרות" rows="3"></textarea>
+  <div style="display:flex;gap:8px"><button class="btn" id="ncSave">יצירה</button><button class="ghost" id="ncCancel">ביטול</button></div>
+ </div></div>
  <div class="cl" id="clist"></div>
  <div class="main" id="cdet"></div>
 </section>
 </main>
 
-<script>
-{
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import {getAuth,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signInWithRedirect,sendSignInLinkToEmail,isSignInWithEmailLink,signInWithEmailLink,signOut} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import {getFirestore,doc,getDoc,getDocs,setDoc,updateDoc,collection,serverTimestamp} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+import {firebaseConfig,ADMIN_EMAIL} from "./firebase-config.js";
+
+const fb=initializeApp(firebaseConfig),auth=getAuth(fb),db=getFirestore(fb);
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const pad=n=>String(n).padStart(2,"0");
@@ -183,43 +222,38 @@ const QUOTES=["תתחיל היום. לא מחר.","בתוכו כבר הפסדת.
 const PER={m:"בוקר",d:"במהלך היום",n:"לפני השינה"};
 const TASKS=[["t1","סידור מיטה","m"],["t2","מתיחות","m"],["t3","כתיבת תודות","m"],["t4","קריאת מכתב לעצמי","m"],["t5","2 ליטר מים","d"],["t6","אימון","d"],["t7","חצי שעה על המטרה שלי","d"],["t8","חצי שעה בלי מסך","n"],["t9","כתיבת הצלחות","n"],["t10","5 עמודים בספר","n"]];
 const AVOID=[["a1","שמרתי זרע"],["a2","בלי סמים"],["a3","בלי אלכוהול"]];
-let seed=7;const rnd=()=>(seed=seed*16807%2147483647)/2147483647;
-function mkClient(id,name,startAgo,skill,goals,noteSet){
- const start=addD(TODAY,-startAgo),days={};
- for(let i=0;i<startAgo;i++){const k=addD(start,i),done={},av={},notes={};
-  TASKS.forEach(([t])=>{if(rnd()<skill)done[t]=true});
-  AVOID.forEach(([a])=>{av[a]=rnd()<skill+.12});
-  if(rnd()<.08)notes.t6="היה קשה לקום, הלכתי בכל זאת";
-  days[k]={done,av,notes,note:rnd()<.25?noteSet[Math.floor(rnd()*noteSet.length)]:""}}
- return{id,name,start,goals,tasks:TASKS.map(([i,t,p])=>({i,t,p})),avoid:AVOID.map(([i,t])=>({i,t})),days};
-}
-const DEF=[
- mkClient("c1","אורי",33,.78,["לעבור לעבודה בעריכת וידאו","להגיע ל־75 קילו","זוגיות רצינית"],["יום טוב, הרגשתי שליטה","הייתי עייף אבל עמדתי בזה","ערב קשה, דיברתי עם חבר במקום לברוח"]),
- mkClient("c2","תומר",58,.55,["לסגור חובות","4 אימונים בשבוע","לישון לפני 00:00"],["נפלתי באמצע הערב","יום עמוס בעבודה","חזרתי לעצמי"]),
- mkClient("c3","רן",12,.9,["להפסיק לברוח לגלילות","לקרוא ספר בחודש","לבנות ביטחון לדבר מול קהל"],["הרגשתי אנרגיה","יום מעולה"])];
-let S;try{S=JSON.parse(localStorage.getItem("m90"))}catch(_){}
-if(!S||!S.clients)S={clients:DEF,me:"c1"};
-const save=()=>{try{localStorage.setItem("m90",JSON.stringify(S))}catch(_){}};
-const me=()=>S.clients.find(c=>c.id===S.me)||S.clients[0];
-let sel=TODAY,coachSel="c1";
+
+let clients=[],cur=null,isAdmin=false,sel=TODAY,coachSel=null;
+const ref=c=>doc(db,"clients",c.email);
+const toast=t=>{const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(()=>e.classList.remove("on"),2200)};
+const fail=e=>{console.error(e);toast("לא נשמר. בדוק חיבור ונסה שוב")};
+const show=id=>["login","loading","noChal","client","coach"].forEach(x=>$(x).hidden=x!==id);
+
 const dayOf=(c,k)=>c.days[k]||(c.days[k]={done:{},av:{},notes:{},note:""});
 const score=(c,k)=>{const d=c.days[k];if(!d)return null;const tot=c.tasks.length+c.avoid.length;if(!tot)return 0;
- const n=c.tasks.filter(t=>d.done[t.i]).length+c.avoid.filter(a=>d.av[a.i]).length;return Math.round(n/tot*100)};
+ const n=c.tasks.filter(t=>d.done?.[t.i]).length+c.avoid.filter(a=>d.av?.[a.i]).length;return Math.round(n/tot*100)};
 const lvl=p=>p==null?"":p>=100?"l3":p>=60?"l2":p>0?"l1":"";
 const dayNum=(c,k)=>diff(c.start,k)+1;
 function streak(c){let s=0,k=TODAY;if((score(c,k)??0)<60)k=addD(k,-1);while(diff(c.start,k)>=0&&(score(c,k)??0)>=60){s++;k=addD(k,-1)}return s}
 function avg(c,n){let t=0,m=0;for(let i=0;i<n;i++){const k=addD(TODAY,-i);if(diff(c.start,k)<0)break;t+=score(c,k)??0;m++}return m?Math.round(t/m):0}
 
+function saveDay(c,k){const f={["days."+k]:c.days[k]};if(!isAdmin)f.lastSeen=serverTimestamp();return updateDoc(ref(c),f).catch(fail)}
+const timers={};
+function saveDayLater(c,k){clearTimeout(timers[k]);timers[k]=setTimeout(()=>saveDay(c,k),700)}
+const saveF=(c,f)=>updateDoc(ref(c),f).then(()=>toast("נשמר ✓")).catch(fail);
+
 function renderClient(){
- const c=me(),dn=Math.min(Math.max(dayNum(c,TODAY),1),90);
- $("hello").textContent="בוקר טוב, "+c.name;
- $("dayBig").innerHTML="יום "+dn+" <small>מתוך 90</small>";
- $("barI").style.width=Math.round(dn/90*100)+"%";
- $("stats").innerHTML=`<span><b>${streak(c)}</b>ימים ברצף</span><span><b>${avg(c,7)}%</b>השבוע</span><span><b>${90-dn}</b>ימים לסיום</span>`;
+ const c=cur,dn=Math.min(Math.max(dayNum(c,TODAY),1),90),started=TODAY>=c.start;
+ if(sel<c.start)sel=c.start;if(sel>TODAY)sel=TODAY;
+ $("hello").textContent=(new Date().getHours()<12?"בוקר טוב, ":new Date().getHours()<18?"צהריים טובים, ":"ערב טוב, ")+c.name;
+ $("dayBig").innerHTML=started?"יום "+dn+" <small>מתוך 90</small>":"מתחילים <small>"+fmt(c.start)+"</small>";
+ $("barI").style.width=(started?Math.round(dn/90*100):0)+"%";
+ $("stats").innerHTML=`<span><b>${streak(c)}</b>ימים ברצף</span><span><b>${avg(c,7)}%</b>השבוע</span><span><b>${started?90-dn:90}</b>ימים לסיום</span>`;
  $("quote").textContent=QUOTES[dn%QUOTES.length];
  let g="";for(let i=0;i<90;i++){const k=addD(c.start,i),fut=k>TODAY,p=fut?null:score(c,k);
   g+=`<button class="cell ${fut?"fut":lvl(p)} ${k===TODAY?"today":""} ${k===sel?"sel":""}" data-k="${k}" ${fut?"disabled":""} aria-label="יום ${i+1}${p!=null?": "+p+"%":""}" title="יום ${i+1}${p!=null?" · "+p+"%":""}"></button>`}
  $("grid").innerHTML=g;
+ const main=document.querySelector("#client .main");main.hidden=!started;if(!started)return;
  const d=dayOf(c,sel),p=score(c,sel)??0;
  $("dTitle").textContent=(sel===TODAY?"היום · ":"")+fmt(sel)+" · יום "+dayNum(c,sel);
  $("dPct").textContent=p+"%";$("cele").classList.toggle("on",p===100);
@@ -237,54 +271,103 @@ function renderClient(){
    <button class="nb ${d.notes[a.i]?"has":""}" data-n="${a.i}">${d.notes[a.i]?"הערה ✎":"+ הערה"}</button></div>
    <textarea class="tnote" data-tn="${a.i}" placeholder="מה קרה? מה למדת?" ${d.notes[a.i]?"":"hidden"} aria-label="הערה: ${esc(a.t)}">${esc(d.notes[a.i]||"")}</textarea></div>`).join("");
  $("dayNote").value=d.note||"";
- $("goals").innerHTML=c.goals.map((x,i)=>`<div class="goal"><i>${i+1}</i><div>${esc(x)}</div></div>`).join("");
+ $("goals").innerHTML=c.goals.map((x,i)=>`<div class="goal"><i>${i+1}</i><div>${esc(x)}</div></div>`).join("")||'<p class="hi">המטרות ייכנסו אחרי השיחה עם דניאל</p>';
 }
 
 function renderCoach(){
- $("clist").innerHTML=S.clients.map(c=>{const dn=Math.min(dayNum(c,TODAY),90),w=avg(c,7),last=[...Array(7)].map((_,i)=>addD(TODAY,i-6));
-  const miss=last.slice(-2).every(k=>!c.days[k]||!(score(c,k)>0));
-  const br=last.reduce((n,k)=>n+(c.days[k]?c.avoid.filter(a=>c.days[k].av[a.i]===false).length:0),0);
-  const flag=miss?"לא סימן יומיים":w<50?"ירידה באחוזים":br>2?br+" נפילות השבוע":"במסלול";
-  return `<button class="cc ${c.id===coachSel?"on":""}" data-c="${c.id}"><span class="nm">${esc(c.name)}</span>
-   <span>יום ${dn}/90 · השבוע <b>${w}%</b> · רצף ${streak(c)}</span>
+ if(!clients.length){$("clist").innerHTML='<p class="hi">עוד אין לקוחות. לוחצים "+ לקוח חדש".</p>';$("cdet").innerHTML="";return}
+ $("clist").innerHTML=clients.map(c=>{const dn=Math.min(dayNum(c,TODAY),90),w=avg(c,7),last=[...Array(7)].map((_,i)=>addD(TODAY,i-6));
+  const notYet=TODAY<c.start;
+  const miss=!notYet&&dn>=2&&last.slice(-2).every(k=>!c.days[k]||!(score(c,k)>0));
+  const br=last.reduce((n,k)=>n+(c.days[k]?c.avoid.filter(a=>c.days[k].av?.[a.i]===false).length:0),0);
+  const flag=notYet?"מתחיל "+fmt(c.start):miss?"לא סימן יומיים":dn>=3&&w<50?"ירידה באחוזים":br>2?br+" נפילות השבוע":"במסלול";
+  return `<button class="cc ${c.email===coachSel?"on":""}" data-c="${esc(c.email)}"><span class="nm">${esc(c.name)}</span>
+   <span>${notYet?"עוד לא התחיל":"יום "+dn+"/90 · השבוע <b>"+w+"%</b> · רצף "+streak(c)}</span>
    <span class="mini">${last.map(k=>{const p=score(c,k);return `<i class="cell ${lvl(p)}" style="aspect-ratio:auto" title="${fmt(k)}: ${p??0}%"></i>`}).join("")}</span>
-   <span class="flag ${flag==="במסלול"?"okf":""}">${flag}</span></button>`}).join("");
- const c=S.clients.find(x=>x.id===coachSel)||S.clients[0];
- const keys=Object.keys(c.days).filter(k=>k<=TODAY).sort();
- const rate=(it,isA)=>{const n=keys.filter(k=>isA?c.days[k].av[it.i]:c.days[k].done[it.i]).length;return keys.length?Math.round(n/keys.length*100):0};
+   <span class="flag ${flag==="במסלול"||notYet?"okf":""}">${flag}</span></button>`}).join("");
+ const c=clients.find(x=>x.email===coachSel)||clients[0];coachSel=c.email;
+ const keys=Object.keys(c.days).filter(k=>k<=TODAY&&k>=c.start).sort();
+ const rate=(it,isA)=>{const n=keys.filter(k=>isA?c.days[k].av?.[it.i]:c.days[k].done?.[it.i]).length;return keys.length?Math.round(n/keys.length*100):0};
  const items=[...c.tasks.map(t=>({...t,r:rate(t,0)})),...c.avoid.map(a=>({...a,r:rate(a,1)}))].sort((a,b)=>a.r-b.r);
  const notes=[];keys.slice().reverse().forEach(k=>{const d=c.days[k];if(d.note)notes.push([k,"סיכום יום",d.note]);
   Object.entries(d.notes||{}).forEach(([i,t])=>{if(t){const it=[...c.tasks,...c.avoid].find(x=>x.i===i);notes.push([k,it?it.t:"",t])}})});
- $("cdet").innerHTML=`<div><div class="card"><h2>${esc(c.name)} · יום ${Math.min(dayNum(c,TODAY),90)}/90</h2>
-   <h3>מה הכי חלש אצלו (מהנמוך לגבוה)</h3>${items.map(x=>`<div class="rate"><span>${esc(x.t)}</span><span class="bg"><i style="width:${x.r}%"></i></span><b>${x.r}%</b></div>`).join("")}</div>
+ const seen=c.lastSeen?.toDate?c.lastSeen.toDate():null;
+ $("cdet").innerHTML=`<div><div class="card"><h2>${esc(c.name)} · ${TODAY<c.start?"מתחיל "+fmt(c.start):"יום "+Math.min(dayNum(c,TODAY),90)+"/90"}</h2>
+   <p class="hi" style="font-size:14px;margin:4px 0" dir="auto">${esc(c.email)} · ${seen?"נכנס לאחרונה "+seen.getDate()+"."+(seen.getMonth()+1)+" "+pad(seen.getHours())+":"+pad(seen.getMinutes()):"עוד לא נכנס"}</p>
+   <div class="edit"><label class="hi" style="font-size:14px">תאריך התחלה <input type="date" id="cStart" value="${c.start}"></label><button class="ghost" id="asClient">לראות כמו הלקוח</button></div>
+   <h3>מה הכי חלש אצלו (מהנמוך לגבוה)</h3>${keys.length?items.map(x=>`<div class="rate"><span>${esc(x.t)}</span><span class="bg"><i style="width:${x.r}%"></i></span><b>${x.r}%</b></div>`).join(""):'<p class="hi">עוד אין סימונים</p>'}</div>
   <div class="card"><h2>משימות והימנעויות</h2>
    ${c.tasks.map(t=>`<div class="row task"><span class="tl">${esc(t.t)} <small style="color:var(--mut)">· ${PER[t.p]}</small></span><button class="del" data-del="${t.i}" aria-label="הסרה">✕</button></div>`).join("")}
    ${c.avoid.map(a=>`<div class="row task"><span class="tl">${esc(a.t)} <small style="color:var(--mut)">· הימנעות</small></span><button class="del" data-dela="${a.i}" aria-label="הסרה">✕</button></div>`).join("")}
    <div class="edit"><input id="nt" placeholder="משימה חדשה" aria-label="משימה חדשה"><select id="np" aria-label="מתי"><option value="m">בוקר</option><option value="d">במהלך היום</option><option value="n">לפני השינה</option><option value="a">הימנעות</option></select><button class="btn" id="addT">הוספה</button></div></div></div>
-  <div><div class="card"><h2>מטרות</h2>${c.goals.map((g,i)=>`<div class="goal"><i>${i+1}</i><div>${esc(g)}</div></div>`).join("")}</div>
-  <div class="card"><h2>הערות אחרונות</h2>${notes.slice(0,8).map(([k,t,x])=>`<div class="tm"><small>${fmt(k)} · ${esc(t)}</small>${esc(x)}</div>`).join("")||'<p class="hi">עוד אין הערות</p>'}</div></div>`;
+  <div><div class="card"><h2>מטרות</h2>${c.goals.map((g,i)=>`<div class="goal"><i>${i+1}</i><div style="flex:1">${esc(g)}</div><button class="del" data-delg="${i}" aria-label="הסרה">✕</button></div>`).join("")}
+   <div class="edit"><input id="ng" placeholder="מטרה חדשה" aria-label="מטרה חדשה"><button class="btn" id="addG">הוספה</button></div></div>
+  <div class="card"><h2>הערות אחרונות</h2>${notes.slice(0,10).map(([k,t,x])=>`<div class="tm"><small>${fmt(k)} · ${esc(t)}</small>${esc(x)}</div>`).join("")||'<p class="hi">עוד אין הערות</p>'}</div></div>`;
 }
 
-function view(v){$("client").hidden=v!=="client";$("coach").hidden=v!=="coach";$("vClient").classList.toggle("on",v==="client");$("vCoach").classList.toggle("on",v==="coach");v==="client"?renderClient():renderCoach()}
+function view(v){show(v);$("vClient").classList.toggle("on",v==="client");$("vCoach").classList.toggle("on",v==="coach");
+ if(v==="client"&&isAdmin){cur=clients.find(x=>x.email===coachSel);if(!cur){view("coach");return}$("asNote").hidden=false;$("asNote").textContent="אתה רואה את המסך של "+cur.name+". סימון כאן נשמר אצלו."}else $("asNote").hidden=true;
+ v==="client"?renderClient():renderCoach()}
+
+async function loadAll(){const s=await getDocs(collection(db,"clients"));clients=s.docs.map(d=>norm(d.data())).sort((a,b)=>a.name.localeCompare(b.name,"he"))}
+const norm=c=>({goals:[],tasks:[],avoid:[],days:{},...c});
+
+onAuthStateChanged(auth,async u=>{
+ if(!u){$("seg").hidden=true;$("out").hidden=true;$("who").textContent="";show("login");return}
+ show("loading");$("out").hidden=false;
+ const email=(u.email||"").toLowerCase();isAdmin=email===ADMIN_EMAIL;$("who").textContent=email;
+ try{
+  if(isAdmin){$("seg").hidden=false;await loadAll();view("coach")}
+  else{const s=await getDoc(doc(db,"clients",email));if(!s.exists()){show("noChal");return}
+   cur=norm(s.data());sel=TODAY;view("client");updateDoc(ref(cur),{lastSeen:serverTimestamp()}).catch(()=>{})}
+ }catch(e){console.error(e);$("noChal").innerHTML="משהו לא נטען. נסה לרענן את העמוד.";show("noChal")}
+});
+
+// login
+const lmsg=(t,err)=>{$("lmsg").textContent=t;$("lmsg").classList.toggle("err",!!err)};
+$("gIn").onclick=async()=>{const p=new GoogleAuthProvider();p.setCustomParameters({prompt:"select_account"});
+ try{await signInWithPopup(auth,p)}catch(e){if(/popup|operation-not-supported|web-storage/.test(e.code||""))signInWithRedirect(auth,p);else lmsg("הכניסה לא הצליחה. נסה בקישור למייל",1)}};
+$("sendLink").onclick=async()=>{const em=$("em").value.trim().toLowerCase();if(!/^\S+@\S+\.\S+$/.test(em)){lmsg("צריך מייל תקין",1);return}
+ try{await sendSignInLinkToEmail(auth,em,{url:location.origin+location.pathname,handleCodeInApp:true});localStorage.setItem("m90mail",em);
+  lmsg("שלחנו לך קישור למייל. תפתח אותו בטלפון הזה (תבדוק גם בספאם)")}catch(e){console.error(e);lmsg("לא הצלחנו לשלוח. נסה כניסה עם Google",1)}};
+if(isSignInWithEmailLink(auth,location.href)){let em=localStorage.getItem("m90mail");if(!em)em=prompt("לאישור, תכתוב שוב את המייל שלך");
+ if(em)signInWithEmailLink(auth,em.trim().toLowerCase(),location.href).then(()=>{localStorage.removeItem("m90mail");history.replaceState(null,"",location.pathname)}).catch(e=>{console.error(e);show("login");lmsg("הקישור פג תוקף. תבקש קישור חדש",1)})}
+$("out").onclick=()=>signOut(auth);
+
+// client events
 $("vClient").onclick=()=>view("client");$("vCoach").onclick=()=>view("coach");
 $("prev").onclick=()=>{sel=addD(sel,-1);renderClient()};
 $("next").onclick=()=>{if(sel<TODAY){sel=addD(sel,1);renderClient()}};
 $("grid").addEventListener("click",e=>{const b=e.target.closest("[data-k]");if(b&&!b.disabled){sel=b.dataset.k;renderClient()}});
-$("client").addEventListener("change",e=>{const c=me(),d=dayOf(c,sel),t=e.target;
- if(t.dataset.t){d.done[t.dataset.t]=t.checked;save();renderClient()}
- if(t.dataset.a){d.av[t.dataset.a]=t.checked;save();renderClient()}});
-$("client").addEventListener("input",e=>{const c=me(),d=dayOf(c,sel),t=e.target;
- if(t.dataset.tn){d.notes[t.dataset.tn]=t.value;save()}
- if(t.id==="dayNote"){d.note=t.value;save()}});
+$("client").addEventListener("change",e=>{const c=cur,d=dayOf(c,sel),t=e.target;
+ if(t.dataset.t){d.done[t.dataset.t]=t.checked;saveDay(c,sel);renderClient()}
+ if(t.dataset.a){d.av[t.dataset.a]=t.checked;saveDay(c,sel);renderClient()}});
+$("client").addEventListener("input",e=>{const c=cur,d=dayOf(c,sel),t=e.target;
+ if(t.dataset.tn){d.notes[t.dataset.tn]=t.value;saveDayLater(c,sel)}
+ if(t.id==="dayNote"){d.note=t.value;saveDayLater(c,sel)}});
 $("client").addEventListener("click",e=>{const b=e.target.closest("[data-n]");if(!b)return;const ta=b.closest(".task").querySelector("textarea");ta.hidden=!ta.hidden;if(!ta.hidden)ta.focus()});
-$("coach").addEventListener("click",e=>{const c=S.clients.find(x=>x.id===coachSel);
+
+// coach events
+$("newBtn").onclick=()=>{$("newForm").hidden=false;$("ncStart").value=TODAY;$("ncName").focus()};
+$("ncCancel").onclick=()=>$("newForm").hidden=true;
+$("refresh").onclick=async()=>{await loadAll();renderCoach();toast("עודכן")};
+$("ncSave").onclick=async()=>{const name=$("ncName").value.trim(),email=$("ncEmail").value.trim().toLowerCase(),start=$("ncStart").value||TODAY;
+ if(!name||!/^\S+@\S+\.\S+$/.test(email)){toast("צריך שם ומייל תקין");return}
+ if(clients.some(c=>c.email===email)){toast("כבר יש לקוח עם המייל הזה");return}
+ const c={name,email,start,goals:$("ncGoals").value.split("\n").map(s=>s.trim()).filter(Boolean),
+  tasks:TASKS.map(([i,t,p])=>({i,t,p})),avoid:AVOID.map(([i,t])=>({i,t})),days:{},created:serverTimestamp()};
+ try{await setDoc(doc(db,"clients",email),c);await loadAll();coachSel=email;$("newForm").hidden=true;["ncName","ncEmail","ncGoals"].forEach(x=>$(x).value="");renderCoach();toast(name+" נוסף ✓")}catch(e){fail(e)}};
+$("coach").addEventListener("change",e=>{const c=clients.find(x=>x.email===coachSel);if(e.target.id==="cStart"&&e.target.value){c.start=e.target.value;saveF(c,{start:c.start});renderCoach()}});
+$("coach").addEventListener("click",e=>{const c=clients.find(x=>x.email===coachSel);
  const cc=e.target.closest("[data-c]");if(cc){coachSel=cc.dataset.c;renderCoach();return}
- const d1=e.target.closest("[data-del]");if(d1){c.tasks=c.tasks.filter(t=>t.i!==d1.dataset.del);save();renderCoach();return}
- const d2=e.target.closest("[data-dela]");if(d2){c.avoid=c.avoid.filter(a=>a.i!==d2.dataset.dela);save();renderCoach();return}
+ if(e.target.id==="asClient"){sel=TODAY;view("client");return}
+ const d1=e.target.closest("[data-del]");if(d1){c.tasks=c.tasks.filter(t=>t.i!==d1.dataset.del);saveF(c,{tasks:c.tasks});renderCoach();return}
+ const d2=e.target.closest("[data-dela]");if(d2){c.avoid=c.avoid.filter(a=>a.i!==d2.dataset.dela);saveF(c,{avoid:c.avoid});renderCoach();return}
+ const d3=e.target.closest("[data-delg]");if(d3){c.goals.splice(+d3.dataset.delg,1);saveF(c,{goals:c.goals});renderCoach();return}
  if(e.target.id==="addT"){const t=$("nt").value.trim(),p=$("np").value;if(!t)return;const i="x"+Date.now();
-  p==="a"?c.avoid.push({i,t}):c.tasks.push({i,t,p});save();renderCoach()}});
-view("client");
-}
+  if(p==="a"){c.avoid.push({i,t});saveF(c,{avoid:c.avoid})}else{c.tasks.push({i,t,p});saveF(c,{tasks:c.tasks})}renderCoach()}
+ if(e.target.id==="addG"){const g=$("ng").value.trim();if(!g)return;c.goals.push(g);saveF(c,{goals:c.goals});renderCoach()}});
 </script>
+<div class="toast" id="toast" role="status"></div>
 </body>
 </html>
