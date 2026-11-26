@@ -122,7 +122,7 @@ textarea.big{width:100%;min-height:110px;border:1px solid var(--line);border-rad
 <header class="top"><div class="wrap">
  <div class="logo k">מילה של <b>גבר</b> · 90</div>
  <div class="seg" role="tablist" aria-label="תצוגה" id="seg" hidden>
-  <button id="vClient" class="on" role="tab">מסך הלקוח</button>
+  <button id="vClient" role="tab">מסך הלקוח</button>
   <button id="vCoach" role="tab">בקרת מאמן</button>
  </div>
  <span class="who" id="who"></span><button class="out" id="out" hidden>יציאה</button>
@@ -320,7 +320,7 @@ onAuthStateChanged(auth,async u=>{
   if(isAdmin){$("seg").hidden=false;await loadAll();view("coach")}
   else{const s=await getDoc(doc(db,"clients",email));if(!s.exists()){show("noChal");return}
    cur=norm(s.data());sel=TODAY;view("client");updateDoc(ref(cur),{lastSeen:serverTimestamp()}).catch(()=>{})}
- }catch(e){console.error(e);$("noChal").innerHTML="משהו לא נטען. נסה לרענן את העמוד.";show("noChal")}
+ }catch(e){console.error(e);$("noChal").innerHTML="משהו לא נטען. נסה לרענן את העמוד.<br><small dir=ltr>"+esc(e.code||e.message)+"</small>";show("noChal")}
 });
 
 // login
