@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>אתגר 90 · מילה של גבר</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karantina:wght@400;700&family=Heebo:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday habit tracker, warm and encouraging, man-to-man
+   IDEA a 90-cell path that fills with sunshine, one cell per day kept
+   PICTURE the 90-day grid with the big day number, today's cell glowing
+   COLOUR warm paper, deep ink, brand yellow #FFD60A, sunny orange, fresh green for done
+   TYPE Karantina for numbers and titles + Heebo for text
+   LAYOUT laptop: day + grid across the top, tasks and side column below; phone: one column */
+:root{color-scheme:light dark;--bg:light-dark(#fffaf0,#15130d);--card:light-dark(#ffffff,#1f1c14);--ink:light-dark(#17150f,#f6f1e4);--mut:light-dark(#6b6556,#b4ad9b);--line:light-dark(#ece3cf,#3a3424);--y:#FFD60A;--yd:light-dark(#fff3b0,#3d3410);--o:#ff9f1c;--g:#22a865;--gd:light-dark(#dff5e8,#163a27);--r:#e5484d}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 Heebo,system-ui,sans-serif;overflow-x:clip}
+.k{font-family:Karantina,Heebo,sans-serif;font-weight:700;line-height:1;letter-spacing:.2px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 max(4vw,16px)}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--o);outline-offset:2px}
+.top{background:#17150f;color:#fff;position:sticky;top:0;z-index:5}
+.top .wrap{display:flex;align-items:center;gap:12px;min-height:60px;flex-wrap:wrap}
+.logo{font-size:30px;color:#fff}.logo b{color:var(--y);font-weight:700}
+.seg{margin-inline-start:auto;display:flex;background:#2b2719;border-radius:999px;padding:4px}
+.seg button{border:0;background:none;color:#ddd;padding:8px 16px;border-radius:999px;font-weight:700;min-height:40px}
+.seg button.on{background:var(--y);color:#17150f}
+.sample{font-size:13px;color:var(--mut);padding:8px 0 0}
+.hero{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:28px;align-items:center;padding:22px 0 10px}
+.hi{font-size:18px;color:var(--mut)}
+.day{font-size:clamp(84px,13vw,150px);margin:2px 0;white-space:nowrap}
+.day small{font-size:.38em;color:var(--mut)}
+.bar{height:14px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0 6px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--o),var(--y));border-radius:99px}
+.stats{display:flex;gap:18px;flex-wrap:wrap;font-weight:700;font-size:15px}
+.stats span b{font-family:Karantina;font-size:30px;margin-inline-end:4px}
+.quote{margin-top:14px;background:var(--y);color:#17150f;padding:12px 18px;border-radius:14px;font-weight:700;font-size:18px;transform:rotate(-1deg);display:inline-block;box-shadow:4px 5px 0 rgba(0,0,0,.12)}
+.grid90{display:grid;grid-template-columns:repeat(15,minmax(0,1fr));gap:6px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+.cell{aspect-ratio:1;border-radius:7px;background:var(--line);border:0;padding:0;font-size:11px;color:transparent;position:relative}
+.cell.l1{background:#ffe98a}.cell.l2{background:var(--y)}.cell.l3{background:var(--o)}
+.cell.fut{background:transparent;border:1.5px dashed var(--line)}
+.cell.today{box-shadow:0 0 0 3px var(--ink)}
+.cell.sel{outline:3px solid var(--g);outline-offset:1px}
+.legend{display:flex;gap:12px;font-size:13px;color:var(--mut);margin-top:8px;flex-wrap:wrap}
+.legend span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:4px;background:var(--c);margin-inline-end:5px;vertical-align:-2px}
+.main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:22px;padding:18px 0 40px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px}
+.card+.card{margin-top:16px}
+h2{margin:0 0 4px;font-family:Karantina,Heebo;font-size:38px;line-height:1}
+h3{margin:14px 0 6px;font-size:15px;color:var(--mut);font-weight:700}
+.dnav{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.dnav h2{flex:1}
+.ib{border:1px solid var(--line);background:var(--card);border-radius:10px;min-width:40px;min-height:40px;font-size:18px}
+.pct{font-family:Karantina;font-size:34px;color:var(--o)}
+.task{border-bottom:1px solid var(--line);padding:8px 0}
+.task:last-child{border-bottom:0}
+.row{display:flex;align-items:center;gap:10px}
+.chk{appearance:none;width:30px;height:30px;border-radius:9px;border:2px solid var(--line);background:var(--card);flex:none;display:grid;place-items:center;margin:0}
+.chk:checked{background:var(--g);border-color:var(--g)}
+.chk:checked::after{content:"✓";color:#fff;font-weight:900}
+.chk.av:checked{background:var(--g)}
+.tl{flex:1;font-weight:500;font-size:17px}
+.task.done .tl{color:var(--mut);text-decoration:line-through;text-decoration-color:var(--g)}
+.nb{border:0;background:none;color:var(--mut);font-size:14px;padding:6px 8px;border-radius:8px;min-height:36px}
+.nb.has{color:var(--o);font-weight:700}
+.tnote{width:100%;margin-top:6px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg);min-height:44px;font-size:16px;resize:vertical}
+.ok{font-size:14px;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--gd);color:var(--g)}
+.ok.br{background:light-dark(#fde4e4,#3d1c1c);color:var(--r)}
+textarea.big{width:100%;min-height:110px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg);font-size:16px;resize:vertical}
+.goal{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line)}
+.goal:last-child{border-bottom:0}
+.goal i{flex:none;width:28px;height:28px;border-radius:50%;background:var(--y);display:grid;place-items:center;font-style:normal;font-weight:900;color:#17150f}
+.celebrate{display:none;background:var(--gd);color:var(--g);font-weight:900;border-radius:12px;padding:10px 14px;margin:8px 0;font-size:17px}
+.celebrate.on{display:block;animation:pop .5s ease}
+@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.celebrate.on{animation:none}}
+/* coach */
+.cl{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;padding:18px 0}
+.cc{text-align:start;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:8px}
+.cc.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink)}
+.cc .nm{font-weight:900;font-size:19px}
+.mini{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.mini i{height:22px;border-radius:5px;background:var(--line)}
+.flag{font-size:13px;font-weight:700;color:var(--r)}
+.flag.okf{color:var(--g)}
+.rate{display:grid;grid-template-columns:minmax(0,1fr) 120px 44px;gap:10px;align-items:center;padding:5px 0;font-size:15px}
+.rate .bg{height:10px;background:var(--line);border-radius:99px;overflow:hidden}
+.rate .bg i{display:block;height:100%;background:var(--o)}
+.rate b{text-align:left;white-space:nowrap}
+.tm{border-inline-start:3px solid var(--y);padding:4px 12px;margin:8px 0;font-size:15px}
+.tm small{color:var(--mut);display:block}
+.edit{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.edit input,.edit select{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg);min-height:42px;font-size:16px}
+.edit input{flex:1}
+.btn{background:var(--y);color:#17150f;border:0;border-radius:10px;padding:8px 16px;font-weight:900;min-height:42px}
+.del{border:0;background:none;color:var(--mut);min-width:36px;min-height:36px}
+[hidden]{display:none!important}
+@media (max-width:860px){.hero,.main{grid-template-columns:minmax(0,1fr)}.grid90{grid-template-columns:repeat(10,minmax(0,1fr))}}
+@media (max-width:420px){.seg button{padding:8px 11px}.rate{grid-template-columns:minmax(0,1fr) 70px 40px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+ <div class="logo k">מילה של <b>גבר</b> · 90</div>
+ <div class="seg" role="tablist" aria-label="תצוגה">
+  <button id="vClient" class="on" role="tab">מסך הלקוח</button>
+  <button id="vCoach" role="tab">בקרת מאמן</button>
+ </div>
+</div></header>
+
+<main class="wrap">
+<p class="sample">אב־טיפוס עם נתוני דוגמה. הסימונים נשמרים בדפדפן הזה בלבד.</p>
+
+<section id="client">
+ <div class="hero">
+  <div>
+   <div class="hi" id="hello"></div>
+   <div class="day k" id="dayBig"></div>
+   <div class="bar" aria-hidden="true"><i id="barI"></i></div>
+   <div class="stats" id="stats"></div>
+   <div class="quote" id="quote"></div>
+  </div>
+  <div>
+   <div class="grid90" id="grid" aria-label="90 הימים"></div>
+   <div class="legend"><span style="--c:var(--line)">עוד לא</span><span style="--c:#ffe98a">חלקי</span><span style="--c:var(--y)">רוב המשימות</span><span style="--c:var(--o)">יום מושלם</span></div>
+  </div>
+ </div>
+
+ <div class="main">
+  <div>
+   <div class="card">
+    <div class="dnav">
+     <button class="ib" id="prev" aria-label="יום קודם">›</button>
+     <h2 id="dTitle"></h2>
+     <span class="pct" id="dPct"></span>
+     <button class="ib" id="next" aria-label="יום הבא">‹</button>
+    </div>
+    <div class="celebrate" id="cele">יום מושלם. עמדת במילה שלך 🔥</div>
+    <div id="tasks"></div>
+   </div>
+   <div class="card">
+    <h2>הימנעויות</h2>
+    <div id="avoid"></div>
+   </div>
+  </div>
+  <div>
+   <div class="card">
+    <h2>איך היה היום?</h2>
+    <label for="dayNote" class="hi" style="font-size:15px">מה עבד, מה היה קשה, מה לוקחים למחר</label>
+    <textarea class="big" id="dayNote"></textarea>
+   </div>
+   <div class="card">
+    <h2>המטרות שלי</h2>
+    <div id="goals"></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section id="coach" hidden>
+ <div class="cl" id="clist"></div>
+ <div class="main" id="cdet"></div>
+</section>
+</main>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const ds=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const addD=(s,n)=>{const d=new Date(s+"T12:00");d.setDate(d.getDate()+n);return ds(d)};
+const diff=(a,b)=>Math.round((new Date(b+"T12:00")-new Date(a+"T12:00"))/864e5);
+const TODAY=ds(new Date());
+const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
+const fmt=s=>{const d=new Date(s+"T12:00");return "יום "+DAYS[d.getDay()]+" · "+d.getDate()+"."+(d.getMonth()+1)};
+const QUOTES=["תתחיל היום. לא מחר.","בתוכו כבר הפסדת. תחליט לפני הרגע.","אנחנו מלמדים את המוח שאנחנו עושים מה שאנחנו רוצים.","כל מילה שאתה עומד בה בונה אמון בעצמך.","אתה לא מכור לחומר. אתה מכור לבריחה.","שמים מטרה. מנקים רעשי רקע. סוגרים דליפות אנרגיה.","האנרגיה לא נעלמת. היא מצטברת.","הימים שעוברים הופכים לשנים. תבחר מה הם יהיו."];
+const PER={m:"בוקר",d:"במהלך היום",n:"לפני השינה"};
+const TASKS=[["t1","סידור מיטה","m"],["t2","מתיחות","m"],["t3","כתיבת תודות","m"],["t4","קריאת מכתב לעצמי","m"],["t5","2 ליטר מים","d"],["t6","אימון","d"],["t7","חצי שעה על המטרה שלי","d"],["t8","חצי שעה בלי מסך","n"],["t9","כתיבת הצלחות","n"],["t10","5 עמודים בספר","n"]];
+const AVOID=[["a1","שמרתי זרע"],["a2","בלי סמים"],["a3","בלי אלכוהול"]];
+let seed=7;const rnd=()=>(seed=seed*16807%2147483647)/2147483647;
+function mkClient(id,name,startAgo,skill,goals,noteSet){
+ const start=addD(TODAY,-startAgo),days={};
+ for(let i=0;i<startAgo;i++){const k=addD(start,i),done={},av={},notes={};
+  TASKS.forEach(([t])=>{if(rnd()<skill)done[t]=true});
+  AVOID.forEach(([a])=>{av[a]=rnd()<skill+.12});
+  if(rnd()<.08)notes.t6="היה קשה לקום, הלכתי בכל זאת";
+  days[k]={done,av,notes,note:rnd()<.25?noteSet[Math.floor(rnd()*noteSet.length)]:""}}
+ return{id,name,start,goals,tasks:TASKS.map(([i,t,p])=>({i,t,p})),avoid:AVOID.map(([i,t])=>({i,t})),days};
+}
+const DEF=[
+ mkClient("c1","אורי",33,.78,["לעבור לעבודה בעריכת וידאו","להגיע ל־75 קילו","זוגיות רצינית"],["יום טוב, הרגשתי שליטה","הייתי עייף אבל עמדתי בזה","ערב קשה, דיברתי עם חבר במקום לברוח"]),
+ mkClient("c2","תומר",58,.55,["לסגור חובות","4 אימונים בשבוע","לישון לפני 00:00"],["נפלתי באמצע הערב","יום עמוס בעבודה","חזרתי לעצמי"]),
+ mkClient("c3","רן",12,.9,["להפסיק לברוח לגלילות","לקרוא ספר בחודש","לבנות ביטחון לדבר מול קהל"],["הרגשתי אנרגיה","יום מעולה"])];
+let S;try{S=JSON.parse(localStorage.getItem("m90"))}catch(_){}
+if(!S||!S.clients)S={clients:DEF,me:"c1"};
+const save=()=>{try{localStorage.setItem("m90",JSON.stringify(S))}catch(_){}};
+const me=()=>S.clients.find(c=>c.id===S.me)||S.clients[0];
+let sel=TODAY,coachSel="c1";
+const dayOf=(c,k)=>c.days[k]||(c.days[k]={done:{},av:{},notes:{},note:""});
+const score=(c,k)=>{const d=c.days[k];if(!d)return null;const tot=c.tasks.length+c.avoid.length;if(!tot)return 0;
+ const n=c.tasks.filter(t=>d.done[t.i]).length+c.avoid.filter(a=>d.av[a.i]).length;return Math.round(n/tot*100)};
+const lvl=p=>p==null?"":p>=100?"l3":p>=60?"l2":p>0?"l1":"";
+const dayNum=(c,k)=>diff(c.start,k)+1;
+function streak(c){let s=0,k=TODAY;if((score(c,k)??0)<60)k=addD(k,-1);while(diff(c.start,k)>=0&&(score(c,k)??0)>=60){s++;k=addD(k,-1)}return s}
+function avg(c,n){let t=0,m=0;for(let i=0;i<n;i++){const k=addD(TODAY,-i);if(diff(c.start,k)<0)break;t+=score(c,k)??0;m++}return m?Math.round(t/m):0}
+
+function renderClient(){
+ const c=me(),dn=Math.min(Math.max(dayNum(c,TODAY),1),90);
+ $("hello").textContent="בוקר טוב, "+c.name;
+ $("dayBig").innerHTML="יום "+dn+" <small>מתוך 90</small>";
+ $("barI").style.width=Math.round(dn/90*100)+"%";
+ $("stats").innerHTML=`<span><b>${streak(c)}</b>ימים ברצף</span><span><b>${avg(c,7)}%</b>השבוע</span><span><b>${90-dn}</b>ימים לסיום</span>`;
+ $("quote").textContent=QUOTES[dn%QUOTES.length];
+ let g="";for(let i=0;i<90;i++){const k=addD(c.start,i),fut=k>TODAY,p=fut?null:score(c,k);
+  g+=`<button class="cell ${fut?"fut":lvl(p)} ${k===TODAY?"today":""} ${k===sel?"sel":""}" data-k="${k}" ${fut?"disabled":""} aria-label="יום ${i+1}${p!=null?": "+p+"%":""}" title="יום ${i+1}${p!=null?" · "+p+"%":""}"></button>`}
+ $("grid").innerHTML=g;
+ const d=dayOf(c,sel),p=score(c,sel)??0;
+ $("dTitle").textContent=(sel===TODAY?"היום · ":"")+fmt(sel)+" · יום "+dayNum(c,sel);
+ $("dPct").textContent=p+"%";$("cele").classList.toggle("on",p===100);
+ $("next").disabled=sel>=TODAY;$("prev").disabled=sel<=c.start;
+ $("tasks").innerHTML=Object.keys(PER).map(per=>{const ts=c.tasks.filter(t=>t.p===per);if(!ts.length)return"";
+  return `<h3>${PER[per]}</h3>`+ts.map(t=>`<div class="task ${d.done[t.i]?"done":""}"><div class="row">
+   <input type="checkbox" class="chk" id="ck_${t.i}" data-t="${t.i}" ${d.done[t.i]?"checked":""}>
+   <label class="tl" for="ck_${t.i}">${esc(t.t)}</label>
+   <button class="nb ${d.notes[t.i]?"has":""}" data-n="${t.i}">${d.notes[t.i]?"הערה ✎":"+ הערה"}</button></div>
+   <textarea class="tnote" data-tn="${t.i}" placeholder="הערה למשימה" ${d.notes[t.i]?"":"hidden"} aria-label="הערה: ${esc(t.t)}">${esc(d.notes[t.i]||"")}</textarea></div>`).join("")}).join("");
+ $("avoid").innerHTML=c.avoid.map(a=>`<div class="task"><div class="row">
+   <input type="checkbox" class="chk av" id="av_${a.i}" data-a="${a.i}" ${d.av[a.i]?"checked":""}>
+   <label class="tl" for="av_${a.i}">${esc(a.t)}</label>
+   <span class="ok ${d.av[a.i]?"":"br"}">${d.av[a.i]?"עמדתי":"עוד לא סימנתי"}</span>
+   <button class="nb ${d.notes[a.i]?"has":""}" data-n="${a.i}">${d.notes[a.i]?"הערה ✎":"+ הערה"}</button></div>
+   <textarea class="tnote" data-tn="${a.i}" placeholder="מה קרה? מה למדת?" ${d.notes[a.i]?"":"hidden"} aria-label="הערה: ${esc(a.t)}">${esc(d.notes[a.i]||"")}</textarea></div>`).join("");
+ $("dayNote").value=d.note||"";
+ $("goals").innerHTML=c.goals.map((x,i)=>`<div class="goal"><i>${i+1}</i><div>${esc(x)}</div></div>`).join("");
+}
+
+function renderCoach(){
+ $("clist").innerHTML=S.clients.map(c=>{const dn=Math.min(dayNum(c,TODAY),90),w=avg(c,7),last=[...Array(7)].map((_,i)=>addD(TODAY,i-6));
+  const miss=last.slice(-2).every(k=>!c.days[k]||!(score(c,k)>0));
+  const br=last.reduce((n,k)=>n+(c.days[k]?c.avoid.filter(a=>c.days[k].av[a.i]===false).length:0),0);
+  const flag=miss?"לא סימן יומיים":w<50?"ירידה באחוזים":br>2?br+" נפילות השבוע":"במסלול";
+  return `<button class="cc ${c.id===coachSel?"on":""}" data-c="${c.id}"><span class="nm">${esc(c.name)}</span>
+   <span>יום ${dn}/90 · השבוע <b>${w}%</b> · רצף ${streak(c)}</span>
+   <span class="mini">${last.map(k=>{const p=score(c,k);return `<i class="cell ${lvl(p)}" style="aspect-ratio:auto" title="${fmt(k)}: ${p??0}%"></i>`}).join("")}</span>
+   <span class="flag ${flag==="במסלול"?"okf":""}">${flag}</span></button>`}).join("");
+ const c=S.clients.find(x=>x.id===coachSel)||S.clients[0];
+ const keys=Object.keys(c.days).filter(k=>k<=TODAY).sort();
+ const rate=(it,isA)=>{const n=keys.filter(k=>isA?c.days[k].av[it.i]:c.days[k].done[it.i]).length;return keys.length?Math.round(n/keys.length*100):0};
+ const items=[...c.tasks.map(t=>({...t,r:rate(t,0)})),...c.avoid.map(a=>({...a,r:rate(a,1)}))].sort((a,b)=>a.r-b.r);
+ const notes=[];keys.slice().reverse().forEach(k=>{const d=c.days[k];if(d.note)notes.push([k,"סיכום יום",d.note]);
+  Object.entries(d.notes||{}).forEach(([i,t])=>{if(t){const it=[...c.tasks,...c.avoid].find(x=>x.i===i);notes.push([k,it?it.t:"",t])}})});
+ $("cdet").innerHTML=`<div><div class="card"><h2>${esc(c.name)} · יום ${Math.min(dayNum(c,TODAY),90)}/90</h2>
+   <h3>מה הכי חלש אצלו (מהנמוך לגבוה)</h3>${items.map(x=>`<div class="rate"><span>${esc(x.t)}</span><span class="bg"><i style="width:${x.r}%"></i></span><b>${x.r}%</b></div>`).join("")}</div>
+  <div class="card"><h2>משימות והימנעויות</h2>
+   ${c.tasks.map(t=>`<div class="row task"><span class="tl">${esc(t.t)} <small style="color:var(--mut)">· ${PER[t.p]}</small></span><button class="del" data-del="${t.i}" aria-label="הסרה">✕</button></div>`).join("")}
+   ${c.avoid.map(a=>`<div class="row task"><span class="tl">${esc(a.t)} <small style="color:var(--mut)">· הימנעות</small></span><button class="del" data-dela="${a.i}" aria-label="הסרה">✕</button></div>`).join("")}
+   <div class="edit"><input id="nt" placeholder="משימה חדשה" aria-label="משימה חדשה"><select id="np" aria-label="מתי"><option value="m">בוקר</option><option value="d">במהלך היום</option><option value="n">לפני השינה</option><option value="a">הימנעות</option></select><button class="btn" id="addT">הוספה</button></div></div></div>
+  <div><div class="card"><h2>מטרות</h2>${c.goals.map((g,i)=>`<div class="goal"><i>${i+1}</i><div>${esc(g)}</div></div>`).join("")}</div>
+  <div class="card"><h2>הערות אחרונות</h2>${notes.slice(0,8).map(([k,t,x])=>`<div class="tm"><small>${fmt(k)} · ${esc(t)}</small>${esc(x)}</div>`).join("")||'<p class="hi">עוד אין הערות</p>'}</div></div>`;
+}
+
+function view(v){$("client").hidden=v!=="client";$("coach").hidden=v!=="coach";$("vClient").classList.toggle("on",v==="client");$("vCoach").classList.toggle("on",v==="coach");v==="client"?renderClient():renderCoach()}
+$("vClient").onclick=()=>view("client");$("vCoach").onclick=()=>view("coach");
+$("prev").onclick=()=>{sel=addD(sel,-1);renderClient()};
+$("next").onclick=()=>{if(sel<TODAY){sel=addD(sel,1);renderClient()}};
+$("grid").addEventListener("click",e=>{const b=e.target.closest("[data-k]");if(b&&!b.disabled){sel=b.dataset.k;renderClient()}});
+$("client").addEventListener("change",e=>{const c=me(),d=dayOf(c,sel),t=e.target;
+ if(t.dataset.t){d.done[t.dataset.t]=t.checked;save();renderClient()}
+ if(t.dataset.a){d.av[t.dataset.a]=t.checked;save();renderClient()}});
+$("client").addEventListener("input",e=>{const c=me(),d=dayOf(c,sel),t=e.target;
+ if(t.dataset.tn){d.notes[t.dataset.tn]=t.value;save()}
+ if(t.id==="dayNote"){d.note=t.value;save()}});
+$("client").addEventListener("click",e=>{const b=e.target.closest("[data-n]");if(!b)return;const ta=b.closest(".task").querySelector("textarea");ta.hidden=!ta.hidden;if(!ta.hidden)ta.focus()});
+$("coach").addEventListener("click",e=>{const c=S.clients.find(x=>x.id===coachSel);
+ const cc=e.target.closest("[data-c]");if(cc){coachSel=cc.dataset.c;renderCoach();return}
+ const d1=e.target.closest("[data-del]");if(d1){c.tasks=c.tasks.filter(t=>t.i!==d1.dataset.del);save();renderCoach();return}
+ const d2=e.target.closest("[data-dela]");if(d2){c.avoid=c.avoid.filter(a=>a.i!==d2.dataset.dela);save();renderCoach();return}
+ if(e.target.id==="addT"){const t=$("nt").value.trim(),p=$("np").value;if(!t)return;const i="x"+Date.now();
+  p==="a"?c.avoid.push({i,t}):c.tasks.push({i,t,p});save();renderCoach()}});
+view("client");
+}
+</script>
+</body>
+</html>
