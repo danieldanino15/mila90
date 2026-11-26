@@ -2,7 +2,14 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="90 יום">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#17150f">
 <title>אתגר 90 · מילה של גבר</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +31,7 @@ body{background:var(--bg);color:var(--ink);font:16px/1.55 Heebo,system-ui,sans-s
 button,input,textarea,select{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:3px solid var(--o);outline-offset:2px}
-.top{background:#17150f;color:#fff;position:sticky;top:0;z-index:5}
+.top{background:#17150f;color:#fff;position:sticky;top:0;z-index:5;padding-top:env(safe-area-inset-top)}
 .top .wrap{display:flex;align-items:center;gap:12px;min-height:60px;flex-wrap:wrap}
 .logo{font-size:30px;color:#fff}.logo b{color:var(--y);font-weight:700}
 .seg{margin-inline-start:auto;display:flex;background:#2b2719;border-radius:999px;padding:4px}
